@@ -1,16 +1,22 @@
-import type { PropsWithChildren } from 'react';
+import { useRef, type PropsWithChildren } from 'react';
 import { NavbarItem } from './NavbarItem';
 import { Link, useLocation } from 'react-router';
 import { routeDef } from '../../utils/routes';
 import { NavbarLogoLink } from './NavbarLogoLink';
 import { useModal } from '../../hooks/useModal';
-import { Logout, User } from '../icon/icons';
+import { LogoutIcon, UserIcon } from '../icon/icons';
+import { useDetectClickOutside } from '../../hooks/useDetectClickOutside';
+import { NavbarItemMobile } from './NavbarItemMobile';
 
 const routes = [routeDef.timeline];
 
 export function Navbar(props: PropsWithChildren) {
   const location = useLocation();
+
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const userMenuButtonRef = useRef<HTMLLIElement>(null);
   const { userMenuOpen, onUserMenuToggle } = useModal('userMenu');
+  useDetectClickOutside([userMenuRef, userMenuButtonRef], onUserMenuToggle);
 
   return (
     <div className='relative flex h-dvh w-screen'>
@@ -36,12 +42,14 @@ export function Navbar(props: PropsWithChildren) {
           <NavbarLogoLink className='flex sm:hidden' />
           <ul className='mr-1 flex h-14 items-center'>
             <li
+              ref={userMenuButtonRef}
+              role='button'
               className='h-11 w-11 cursor-pointer bg-transparent'
-              onClick={() => onUserMenuToggle()}
+              onClick={onUserMenuToggle}
             >
               <div className='flex h-full w-full items-center justify-center rounded-lg bg-slate-400'>
                 <div className='flex h-10 w-10 items-center justify-center rounded-md bg-slate-200'>
-                  <User size={1.2} className='text-slate-500' />
+                  <UserIcon size={1.2} className='text-slate-500' />
                 </div>
               </div>
             </li>
@@ -53,12 +61,25 @@ export function Navbar(props: PropsWithChildren) {
         </div>
 
         <nav className='flex h-14 w-screen flex-row items-center justify-center bg-slate-800 sm:hidden'>
-          <ul className='mx-1 flex text-lg font-light text-slate-300'></ul>
+          <ul className='mx-1 flex text-lg font-light text-slate-300'>
+            {routes.map((route) => (
+              <NavbarItemMobile
+                key={route.id}
+                url={route.url}
+                text={route.text}
+                icon={<route.icon size='36px' />}
+                selected={route.url === location.pathname}
+              />
+            ))}
+          </ul>
         </nav>
       </div>
 
       {userMenuOpen && (
-        <div className='absolute top-14 right-0 z-20 mt-0.5 w-32 rounded-sm rounded-r-none border border-r-0 border-slate-300 bg-white px-3 py-1'>
+        <div
+          ref={userMenuRef}
+          className='absolute top-14 right-0 z-20 mt-0.5 w-32 rounded-sm rounded-r-none border border-r-0 border-slate-300 bg-white px-3 py-1'
+        >
           <ul className='flex flex-col text-slate-800'>
             <Link
               onClick={onUserMenuToggle}
@@ -74,7 +95,7 @@ export function Navbar(props: PropsWithChildren) {
               to={routeDef.login.url}
               className='my-1 flex items-center'
             >
-              <Logout size={0.8} />
+              <LogoutIcon size={0.8} />
               <li className='ml-2'>Logout</li>
             </Link>
           </ul>

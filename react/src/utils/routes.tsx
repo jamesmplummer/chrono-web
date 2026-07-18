@@ -1,4 +1,4 @@
-import { Settings, Timeline } from '../components/icon/icons';
+import { SettingsIcon, TimelineIcon } from '../components/icon/icons';
 
 export const routeDef = {
   home: {
@@ -17,12 +17,12 @@ export const routeDef = {
     id: 'timeline',
     url: '/timeline',
     text: 'Timeline',
-    icon: Timeline
+    icon: TimelineIcon
   },
   settings: {
     id: 'settings',
     url: '/settings',
     text: 'Settings',
-    icon: Settings
+    icon: SettingsIcon
   }
 };

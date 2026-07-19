@@ -3,9 +3,12 @@ import {
   mdiCalendarFilter,
   mdiChartGantt,
   mdiChartLineVariant,
+  mdiCheck,
   mdiChevronLeft,
   mdiChevronRight,
+  mdiClose,
   mdiCog,
+  mdiDelete,
   mdiDumbbell,
   mdiLogout,
   mdiMeditation,
@@ -18,7 +21,9 @@ import { Icon } from '@mdi/react';
 type IconProps = Parameters<typeof Icon>[0];
 type IconPropsWithoutPath = Omit<IconProps, 'path'>;
 
-type IconComponent = (props: IconPropsWithoutPath) => ReturnType<typeof Icon>;
+export type IconComponent = (
+  props: IconPropsWithoutPath
+) => ReturnType<typeof Icon>;
 
 export const Logo: IconComponent = (props) => {
   return <Icon size={1} {...props} path={mdiTimerCheckOutline} />;
@@ -32,8 +37,16 @@ export const CardioIcon: IconComponent = (props) => {
   return <Icon size={1} {...props} path={mdiRun} />;
 };
 
+export const CloseIcon: IconComponent = (props) => {
+  return <Icon size={1} {...props} path={mdiClose} />;
+};
+
 export const DateIcon: IconComponent = (props) => {
   return <Icon size={1} {...props} path={mdiCalendarFilter} />;
+};
+
+export const DeleteIcon: IconComponent = (props) => {
+  return <Icon size={1} {...props} path={mdiDelete} />;
 };
 
 export const LeftIcon: IconComponent = (props) => {
@@ -56,12 +69,16 @@ export const RightIcon: IconComponent = (props) => {
   return <Icon size={1} {...props} path={mdiChevronRight} />;
 };
 
-export const SessionIcon: IconComponent = (props) => {
+export const SettingsIcon: IconComponent = (props) => {
+  return <Icon size={1} {...props} path={mdiCog} />;
+};
+
+export const StrengthIcon: IconComponent = (props) => {
   return <Icon size={1} {...props} path={mdiDumbbell} />;
 };
 
-export const SettingsIcon: IconComponent = (props) => {
-  return <Icon size={1} {...props} path={mdiCog} />;
+export const SubmitIcon: IconComponent = (props) => {
+  return <Icon size={1} {...props} path={mdiCheck} />;
 };
 
 export const TimelineIcon: IconComponent = (props) => {

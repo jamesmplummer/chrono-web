@@ -5,12 +5,7 @@ import {
   forwardRef,
   useState
 } from 'react';
-import {
-  AddIcon,
-  CardioIcon,
-  MobilityIcon,
-  SessionIcon
-} from '../components/icon/icons';
+import { AddIcon, StrengthIcon } from '../components/icon/icons';
 import { Page } from '../components/layout/Page';
 import { useModal } from '../hooks/useModal';
 import { useDetectClickOutside } from '../hooks/useDetectClickOutside';
@@ -22,11 +17,29 @@ import { InputMonthYear } from '../components/form/InputMonthYear';
 import { TimelineHeaderRow } from '../components/timeline/TimelineHeaderRow';
 import { TimelineDateLabel } from '../components/timeline/TimelineDateLabel';
 import { TimelineRow } from '../components/timeline/TimelineRow';
+import { ActivityDefaultForm } from '../components/timeline/ActivityDefaultForm';
+import { ActivityExerciseForm } from '../components/timeline/ActivityExerciseForm';
+
+type AddButtonProps = PropsWithChildren<HTMLAttributes<HTMLButtonElement>>;
+
+const AddButton = forwardRef<HTMLButtonElement, AddButtonProps>(
+  ({ children, ...props }, ref) => {
+    return (
+      <button
+        {...props}
+        ref={ref}
+        className={`flex h-14 w-14 cursor-pointer items-center justify-center rounded-full shadow-lg shadow-slate-700/20 focus:outline-slate-700 ${props.className}`}
+      >
+        {children}
+      </button>
+    );
+  }
+);
 
 const today = new Date();
-
+const todayDateId = getDateId(today);
 const data = {
-  [`${getDateId(today)}`]: {
+  [`${todayDateId}`]: {
     ids: ['1', '2', '3'],
     items: {
       '1': {
@@ -74,6 +87,7 @@ const keys: Record<string, [number, string]> = {
 
 export function Timeline() {
   const [activities, setActivities] = useState(data);
+  const [selectedActivityId, setSelectedActivityId] = useState<string>();
 
   const addOptionsRef = useRef<HTMLDivElement>(null);
   const addOptionsButtonRef = useRef<HTMLButtonElement>(null);
@@ -83,8 +97,24 @@ export function Timeline() {
     onAddOptionsToggle
   );
 
+  const {
+    activityDefaultOpen,
+    onActivityDefaultToggle,
+    onActivityDefaultClose
+  } = useModal('activityDefault');
+  const {
+    activityExerciseOpen,
+    onActivityExerciseToggle,
+    onActivityExerciseClose
+  } = useModal('activityExercise');
+
   const { date, onChange } = useDateSelect();
   const { dates } = useDatesInMonth(date);
+
+  function onItemClick(id: string) {
+    setSelectedActivityId(id);
+    onActivityDefaultToggle();
+  }
 
   return (
     <Page>
@@ -100,7 +130,7 @@ export function Timeline() {
         </section>
 
         <AddButton
-          id='create-item-button'
+          id='create-activity-button'
           ref={addOptionsButtonRef}
           onClick={onAddOptionsToggle}
           className='fixed right-2 bottom-16 z-20 bg-slate-900'
@@ -110,32 +140,18 @@ export function Timeline() {
         {addOptionsOpen && (
           <div
             ref={addOptionsRef}
-            className='fixed right-2 bottom-[132px] flex gap-3'
+            className='fixed right-2 bottom-[132px] z-10 flex gap-3'
           >
             <AddButton
-              id='create-mobility'
-              onClick={() => {}}
-              className='bg-slate-500'
-            >
-              <MobilityIcon size='38' className='text-slate-100' />
-            </AddButton>
-            <AddButton
-              id='create-cardio'
-              onClick={() => {}}
-              className='bg-slate-600'
-            >
-              <CardioIcon size='32' className='text-slate-100' />
-            </AddButton>
-            <AddButton
-              id='create-session'
-              onClick={() => {}}
+              id='create-exercise'
+              onClick={onActivityExerciseToggle}
               className='bg-slate-700'
             >
-              <SessionIcon size='32' className='text-slate-100' />
+              <StrengthIcon size='32' className='text-slate-100' />
             </AddButton>
             <AddButton
-              id='create-item'
-              onClick={() => {}}
+              id='create-activity'
+              onClick={onActivityDefaultToggle}
               className='bg-slate-800'
             >
               <AddIcon size='32' className='text-slate-50' />
@@ -157,7 +173,12 @@ export function Timeline() {
                     className='flex w-full flex-row'
                   >
                     <TimelineDateLabel date={date} />
-                    <TimelineRow date={date} ids={ids} items={items} />
+                    <TimelineRow
+                      date={date}
+                      ids={ids}
+                      items={items}
+                      onItemClick={onItemClick}
+                    />
                   </li>
                 );
               })}
@@ -165,22 +186,32 @@ export function Timeline() {
           </section>
         </section>
       </div>
+
+      <ActivityDefaultForm
+        open={activityDefaultOpen}
+        onClose={() => {
+          setSelectedActivityId(undefined);
+          onActivityDefaultClose();
+        }}
+        data={
+          selectedActivityId
+            ? activities[todayDateId].items[selectedActivityId]
+            : undefined
+        }
+      />
+
+      <ActivityExerciseForm
+        open={activityExerciseOpen}
+        onClose={() => {
+          setSelectedActivityId(undefined);
+          onActivityExerciseClose();
+        }}
+        data={
+          selectedActivityId
+            ? activities[todayDateId].items[selectedActivityId]
+            : undefined
+        }
+      />
     </Page>
   );
 }
-
-type AddButtonProps = PropsWithChildren<HTMLAttributes<HTMLButtonElement>>;
-
-const AddButton = forwardRef<HTMLButtonElement, AddButtonProps>(
-  ({ children, ...props }, ref) => {
-    return (
-      <button
-        {...props}
-        ref={ref}
-        className={`flex h-14 w-14 items-center justify-center rounded-full shadow-lg shadow-slate-700/20 focus:outline-slate-700 ${props.className}`}
-      >
-        {children}
-      </button>
-    );
-  }
-);

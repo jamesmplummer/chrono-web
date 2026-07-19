@@ -5,8 +5,7 @@ export type TimelineRowProps = {
   date: Date;
   ids?: string[];
   items?: any;
-  onItemClick?: (e: MouseEvent, target?: any) => void;
-  onItemResize?: (e: MouseEvent, target?: any) => void;
+  onItemClick?: (id: string) => void;
 };
 
 export function TimelineRow(props: TimelineRowProps) {
@@ -26,24 +25,12 @@ export function TimelineRow(props: TimelineRowProps) {
         return (
           <div
             key={item.id}
-            className='absolute flex h-full overflow-hidden rounded-sm py-0.5'
+            onClick={() => props.onItemClick?.(id)}
+            className='absolute flex h-full cursor-pointer overflow-hidden rounded-sm py-0.5'
             style={item.style}
-          >
-            {item.isStart && <ItemResizeHandle />}
-            <div className='h-full flex-1 overflow-hidden bg-transparent' />
-            {item.isEnd && <ItemResizeHandle />}
-          </div>
+          />
         );
       })}
-    </div>
-  );
-}
-
-function ItemResizeHandle() {
-  // todo: implement
-  return (
-    <div className='h-full w-1 cursor-ew-resize bg-transparent'>
-      <div className='h-full w-full' />
     </div>
   );
 }

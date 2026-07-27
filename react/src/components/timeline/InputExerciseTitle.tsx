@@ -26,7 +26,7 @@ function DeleteExerciseButton(props: DeleteExerciseButtonProps) {
 
 export type ExerciseTitleInputProps<T extends { title: string }> =
   PropsWithChildren<{
-    value: T;
+    data: T;
     onChange: (value: T) => void;
     onDelete?: () => void;
   }>;
@@ -50,9 +50,9 @@ export function ExerciseTitleInput<T extends { title: string }>(
           placeholder='Exercise'
           icon={props.children}
           onChange={(e) =>
-            props.onChange({ ...props.value, title: e.target.value })
+            props.onChange({ ...props.data, title: e.target.value })
           }
-          value={props.value.title}
+          value={props.data.title}
         />
       </span>
       <DeleteExerciseButton onClick={props.onDelete} />

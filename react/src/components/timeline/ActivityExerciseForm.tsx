@@ -1,10 +1,11 @@
-import { useRef, useState, type PropsWithChildren } from 'react';
+import { useEffect, useRef, useState, type PropsWithChildren } from 'react';
 import type {
   ExerciseStrength,
   ExerciseCardio,
   ExerciseMobility,
   Exercise,
-  ExerciseVariant
+  ExerciseVariant,
+  ExerciseActivity
 } from '../../types/activity';
 import { InputDateTime } from '../form/InputDateTime';
 import { InputTextArea } from '../form/InputTextArea';
@@ -78,41 +79,30 @@ const exerciseDefaultValue = {
 export type ActivityExerciseFormProps = {
   open: boolean;
   onClose: () => void;
-  data?: Record<any, any>;
+  data?: ExerciseActivity;
 };
 
-export function ActivityExerciseForm(props: ActivityExerciseFormProps) {
-  function onCreate() {
-    console.log('onCreate');
-    props.onClose();
-  }
-
-  function onUpdate() {
-    console.log('onUpdate');
-    props.onClose();
-  }
-
-  function onDelete() {
-    console.log('onDelete');
-    props.onClose();
-  }
-
+export function ActivityExerciseForm({
+  data,
+  open,
+  onClose
+}: ActivityExerciseFormProps) {
   const startDateRef = useRef<HTMLInputElement | null>(null);
-  useFocusOnOpen(startDateRef, props.open);
+  useFocusOnOpen(startDateRef, open);
 
-  const titleText = props.data ? 'Update Exercise' : 'Add Exercise';
-  const descriptionExtraText = props.data ? '[ Current Duration: 0h 0m ]' : '';
-  const onSubmit = props.data ? onUpdate : onCreate;
-  const submitButtonText = titleText;
-  const onExtraButtonClick = props.data ? onDelete : undefined;
+  const [start, setStart] = useState<string>(data?.start ?? '');
+  const [end, setEnd] = useState<string>(data?.end ?? '');
+  const [exercises, setExercises] = useState<Exercise[]>(data?.exercise ?? []);
+  const [notes, setNotes] = useState<string>(data?.notes ?? '');
 
-  const [exercises, setExercises] = useState<Exercise[]>([
-    {
-      variant: 'Mobility',
-      title: 'testing',
-      sets: []
+  useEffect(() => {
+    if (open) {
+      setStart(data?.start ?? '');
+      setEnd(data?.end ?? '');
+      setNotes(data?.notes ?? '');
+      setExercises(data?.exercise ?? []);
     }
-  ]);
+  }, [open]);
 
   function onAddExercise(variant: ExerciseVariant) {
     const defaultValue = exerciseDefaultValue[variant];
@@ -121,16 +111,37 @@ export function ActivityExerciseForm(props: ActivityExerciseFormProps) {
     });
   }
 
+  function onCreate() {
+    console.log('onCreate');
+    onClose();
+  }
+
+  function onUpdate() {
+    console.log('onUpdate');
+    onClose();
+  }
+
+  function onDelete() {
+    console.log('onDelete');
+    onClose();
+  }
+
+  const titleText = data ? 'Update Exercise' : 'Add Exercise';
+  const descriptionExtraText = data ? '[ Current Duration: 0h 0m ]' : '';
+  const onSubmit = data ? onUpdate : onCreate;
+  const submitButtonText = titleText;
+  const onExtraButtonClick = data ? onDelete : undefined;
+
   return (
     <SidePanel
-      open={props.open}
+      open={open}
       titleTextSlot={titleText}
       descriptionTextSlot='Record an exercise session'
       descriptionExtraSlot={descriptionExtraText}
       submitButtonTextSlot={submitButtonText}
       extraButtonIconSlot={<DeleteIcon size='24' />}
       extraButtonTextSlot='Delete'
-      onClose={props.onClose}
+      onClose={onClose}
       onSubmit={onSubmit}
       onExtraButtonClick={onExtraButtonClick}
     >
@@ -141,17 +152,15 @@ export function ActivityExerciseForm(props: ActivityExerciseFormProps) {
             ref={startDateRef}
             label='Start'
             placeholder='Start'
-            onChange={(e) => console.log(e.target.value)}
-            value={''}
-            onBlur={() => {}}
+            onChange={(e) => setStart(e.target.value)}
+            value={start}
           />
           <InputDateTime
             required
             label='End'
             placeholder='End'
-            onChange={(e) => console.log(e.target.value)}
-            value={''}
-            onBlur={() => {}}
+            onChange={(e) => setEnd(e.target.value)}
+            value={end}
           />
         </div>
 
@@ -221,9 +230,8 @@ export function ActivityExerciseForm(props: ActivityExerciseFormProps) {
         <InputTextArea
           label='Notes'
           placeholder='Notes'
-          onChange={(e) => console.log(e.target.value)}
-          value={''}
-          onBlur={() => {}}
+          onChange={(e) => setNotes(e.target.value)}
+          value={notes}
         />
       </form>
     </SidePanel>

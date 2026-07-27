@@ -19,6 +19,7 @@ import { TimelineDateLabel } from '../components/timeline/TimelineDateLabel';
 import { TimelineRow } from '../components/timeline/TimelineRow';
 import { ActivityDefaultForm } from '../components/timeline/ActivityDefaultForm';
 import { ActivityExerciseForm } from '../components/timeline/ActivityExerciseForm';
+import type { ActivityVariant } from '../types/activity';
 
 type AddButtonProps = PropsWithChildren<HTMLAttributes<HTMLButtonElement>>;
 
@@ -51,7 +52,10 @@ const data = {
           left: 0,
           width: '10%',
           backgroundColor: 'red'
-        }
+        },
+        start: '2026-07-01T12:00:00.000',
+        end: '2026-07-01T15:00:00.000',
+        notes: 'notes'
       },
       '2': {
         id: '2',
@@ -62,7 +66,10 @@ const data = {
           left: '15%',
           width: '20%',
           backgroundColor: 'blue'
-        }
+        },
+        start: '2026-07-01T03:00:00.000',
+        end: '2026-07-01T15:00:00.000',
+        notes: 'notes'
       },
       '3': {
         id: '3',
@@ -73,7 +80,12 @@ const data = {
           left: '35%',
           width: '40%',
           backgroundColor: 'green'
-        }
+        },
+        start: '2026-07-01T00:00:00.000',
+        end: '2026-07-01T15:00:00.000',
+        notes: 'notes',
+        variant: 'Exercise',
+        exercise: []
       }
     }
   }
@@ -108,12 +120,17 @@ export function Timeline() {
     onActivityExerciseClose
   } = useModal('activityExercise');
 
+  const modalToggle = {
+    Default: onActivityDefaultToggle,
+    Exercise: onActivityExerciseToggle
+  };
+
   const { date, onChange } = useDateSelect();
   const { dates } = useDatesInMonth(date);
 
-  function onItemClick(id: string) {
+  function onItemClick(id: string, variant: ActivityVariant) {
     setSelectedActivityId(id);
-    onActivityDefaultToggle();
+    modalToggle[variant ?? 'Default']();
   }
 
   return (

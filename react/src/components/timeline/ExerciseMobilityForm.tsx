@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import type { ExerciseMobility } from '../../types/activity';
 import { MobilityIcon } from '../icon/icons';
 import { ExerciseTitleInput } from './InputExerciseTitle';
-import { useInitialFocus } from '../../hooks/useInitialFocus';
+import { useFocusOnMount } from '../../hooks/useFocusOnMount';
 
 export type ExerciseMobilityFormProps = {
   data: ExerciseMobility;
@@ -12,11 +12,11 @@ export type ExerciseMobilityFormProps = {
 
 export function ExerciseMobilityForm(props: ExerciseMobilityFormProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
-  useInitialFocus(inputRef);
+  useFocusOnMount(inputRef);
 
   return (
     <ExerciseTitleInput
-      value={props.data}
+      data={props.data}
       onChange={props.onChange}
       onDelete={props.onDelete}
     >

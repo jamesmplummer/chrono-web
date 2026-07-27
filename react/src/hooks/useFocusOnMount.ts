@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-export function useInitialFocus<T extends { focus: () => void } | null>(
+export function useFocusOnMount<T extends { focus: () => void } | null>(
   ref: React.RefObject<T>
 ) {
   useEffect(() => {

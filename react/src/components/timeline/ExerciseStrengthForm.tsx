@@ -1,25 +1,11 @@
 import { useRef } from 'react';
-import { useInitialFocus } from '../../hooks/useInitialFocus';
 import type { ExerciseSet, ExerciseStrength } from '../../types/activity';
 import { StrengthIcon } from '../icon/icons';
 import { ExerciseTitleInput } from './InputExerciseTitle';
 import { InputNumber } from '../form/InputNumber';
 import { AddSubItemButton } from './AddSubItemButton';
 import { DeleteSubItemButton } from './DeleteSubItemButton';
-
-function updateSet<T extends keyof ExerciseSet>(
-  exercise: ExerciseStrength,
-  key: T,
-  value: ExerciseSet[T],
-  idx: number
-) {
-  return {
-    ...exercise,
-    sets: exercise.sets.map((set) => {
-      return set.idx === idx ? { ...set, [key]: value } : set;
-    })
-  };
-}
+import { useFocusOnMount } from '../../hooks/useFocusOnMount';
 
 export type ExerciseStrengthFormProps = {
   data: ExerciseStrength;
@@ -29,12 +15,25 @@ export type ExerciseStrengthFormProps = {
 
 export function ExerciseStrengthForm(props: ExerciseStrengthFormProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
-  useInitialFocus(inputRef);
+  useFocusOnMount(inputRef);
+
+  function updateSet<T extends keyof ExerciseSet>(
+    key: T,
+    value: ExerciseSet[T],
+    idx: number
+  ) {
+    return {
+      ...props.data,
+      sets: props.data.sets.map((set) => {
+        return set.idx === idx ? { ...set, [key]: value } : set;
+      })
+    };
+  }
 
   return (
     <section className='flex flex-col gap-2.5'>
       <ExerciseTitleInput
-        value={props.data}
+        data={props.data}
         onChange={props.onChange}
         onDelete={props.onDelete}
       >
@@ -48,7 +47,7 @@ export function ExerciseStrengthForm(props: ExerciseStrengthFormProps) {
         function onChange(key: 'reps' | 'weight') {
           return (e: React.ChangeEvent<HTMLInputElement>) => {
             const value = parseInt(e.target.value, 10);
-            props.onChange(updateSet(props.data, key, value, set.idx));
+            props.onChange(updateSet(key, value, set.idx));
           };
         }
 

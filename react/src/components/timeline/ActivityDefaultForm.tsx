@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { InputColor } from '../form/InputColor';
 import { InputDateTime } from '../form/InputDateTime';
 import { InputText } from '../form/InputText';
@@ -6,48 +6,69 @@ import { InputTextArea } from '../form/InputTextArea';
 import { DeleteIcon } from '../icon/icons';
 import { SidePanel } from '../layout/SidePanel';
 import { useFocusOnOpen } from '../../hooks/useFocusOnOpen';
+import type { ActivityBase } from '../../types/activity';
 
 export type ActivityDefaultFormProps = {
   open: boolean;
   onClose: () => void;
-  data?: Record<any, any>;
+  data?: ActivityBase;
 };
 
-export function ActivityDefaultForm(props: ActivityDefaultFormProps) {
+export function ActivityDefaultForm({
+  open,
+  onClose,
+  data
+}: ActivityDefaultFormProps) {
+  const titleRef = useRef<HTMLInputElement | null>(null);
+  useFocusOnOpen(titleRef, open);
+
+  const [title, setTitle] = useState<string>(data?.title ?? '');
+  const [group, setGroup] = useState<string>(data?.group ?? '');
+  const [notes, setNotes] = useState<string>(data?.notes ?? '');
+  const [start, setStart] = useState<string>(data?.start ?? '');
+  const [end, setEnd] = useState<string>(data?.end ?? '');
+
+  useEffect(() => {
+    if (open) {
+      setTitle(data?.title ?? '');
+      setGroup(data?.group ?? '');
+      setNotes(data?.notes ?? '');
+      setStart(data?.start ?? '');
+      setEnd(data?.end ?? '');
+    }
+  }, [open]);
+
   function onCreate() {
     console.log('onCreate');
-    props.onClose();
+    onClose();
   }
 
   function onUpdate() {
     console.log('onUpdate');
-    props.onClose();
+    onClose();
   }
 
   function onDelete() {
     console.log('onDelete');
-    props.onClose();
+    onClose();
   }
 
-  const titleRef = useRef<HTMLInputElement | null>(null);
-  useFocusOnOpen(titleRef, props.open);
-
-  const titleText = props.data ? 'Update Activity' : 'Add Activity';
-  const descriptionExtraText = props.data ? '[ Current Duration: 0h 0m ]' : '';
-  const onSubmit = props.data ? onUpdate : onCreate;
+  const titleText = data ? 'Update Activity' : 'Add Activity';
+  const descriptionExtraText = data ? '[ Current Duration: 0h 0m ]' : '';
+  const onSubmit = data ? onUpdate : onCreate;
   const submitButtonText = titleText;
-  const onExtraButtonClick = props.data ? onDelete : undefined;
+  const onExtraButtonClick = data ? onDelete : undefined;
 
   return (
     <SidePanel
-      open={props.open}
+      open={open}
       titleTextSlot={titleText}
       descriptionTextSlot='Record the time spent doing an activity'
       descriptionExtraSlot={descriptionExtraText}
       submitButtonTextSlot={submitButtonText}
       extraButtonIconSlot={<DeleteIcon size='24' />}
       extraButtonTextSlot='Delete'
-      onClose={props.onClose}
+      onClose={onClose}
       onSubmit={onSubmit}
       onExtraButtonClick={onExtraButtonClick}
     >
@@ -57,41 +78,36 @@ export function ActivityDefaultForm(props: ActivityDefaultFormProps) {
           ref={titleRef}
           label='Title'
           placeholder='Title'
-          onChange={(e) => console.log(e.target.value)}
-          value={''}
-          onBlur={() => {}}
+          onChange={(e) => setTitle(e.target.value)}
+          value={title}
         />
         <InputText
           required
           label='Group'
           placeholder='Group'
-          onChange={(e) => console.log(e.target.value)}
-          value={''}
-          onBlur={() => {}}
+          onChange={(e) => setGroup(e.target.value)}
+          value={group}
         />
         <InputTextArea
           label='Notes'
           placeholder='Notes'
-          onChange={(e) => console.log(e.target.value)}
-          value={''}
-          onBlur={() => {}}
+          onChange={(e) => setNotes(e.target.value)}
+          value={notes}
         />
         <div className='my-1 flex justify-between gap-4'>
           <InputDateTime
             required
             label='Start'
             placeholder='Start'
-            onChange={(e) => console.log(e.target.value)}
-            value={''}
-            onBlur={() => {}}
+            onChange={(e) => setStart(e.target.value)}
+            value={start}
           />
           <InputDateTime
             required
             label='End'
             placeholder='End'
-            onChange={(e) => console.log(e.target.value)}
-            value={''}
-            onBlur={() => {}}
+            onChange={(e) => setEnd(e.target.value)}
+            value={end}
           />
         </div>
         <InputColor

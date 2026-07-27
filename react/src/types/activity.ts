@@ -1,3 +1,5 @@
+import type { DateId } from './date';
+
 export type ExerciseVariant = 'Strength' | 'Cardio' | 'Mobility';
 export type ActivityVariant = 'Default' | 'Exercise';
 
@@ -36,3 +38,37 @@ export type ExerciseCardio = {
 };
 
 export type Exercise = ExerciseStrength | ExerciseMobility | ExerciseCardio;
+
+export type ActivityExerciseData = {
+  exercise: Exercise[];
+};
+
+export type ActivityBase = {
+  id: string;
+  title: string;
+  variant: ActivityVariant;
+  group: string;
+  notes?: string;
+  start: string;
+  end: string;
+  timezone: number;
+  createdAt: string;
+  user: string;
+  v: number;
+};
+
+export type ExerciseActivity = ActivityBase & ActivityExerciseData;
+
+export type Activity = ActivityBase | ExerciseActivity;
+
+export type DerivedProperties = {
+  dateId: DateId;
+  startPercentage: number;
+  endPercentage: number;
+  width: number;
+  style: { left: number; width: number; backgroundColor: string };
+  isStart: boolean;
+  isEnd: boolean;
+};
+
+export type FormattedActivity = Activity & DerivedProperties;

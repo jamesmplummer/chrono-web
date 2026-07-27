@@ -4,37 +4,9 @@ import { InputDistance } from '../form/InputDistance';
 import { InputDuration } from '../form/InputDuration';
 import { CardioIcon, AddIcon, CloseIcon } from '../icon/icons';
 import { ExerciseTitleInput } from './InputExerciseTitle';
-import { useInitialFocus } from '../../hooks/useInitialFocus';
 import { AddSubItemButton } from './AddSubItemButton';
 import { DeleteSubItemButton } from './DeleteSubItemButton';
-
-function addSplitsToExercise(exercise: ExerciseCardio) {
-  return {
-    ...exercise,
-    splits: [{ idx: Date.now(), distance: 0, duration: 0 }]
-  };
-}
-
-function removeSplitsFromExercise(exercise: ExerciseCardio) {
-  return {
-    ...exercise,
-    splits: []
-  };
-}
-
-function updateSplit<T extends keyof ExerciseSplit>(
-  exercise: ExerciseCardio,
-  key: T,
-  value: ExerciseSplit[T],
-  idx: number
-) {
-  return {
-    ...exercise,
-    splits: exercise.splits.map((split) => {
-      return split.idx === idx ? { ...split, [key]: value } : split;
-    })
-  };
-}
+import { useFocusOnMount } from '../../hooks/useFocusOnMount';
 
 export type ExerciseCardioFormProps = {
   data: ExerciseCardio;
@@ -44,14 +16,20 @@ export type ExerciseCardioFormProps = {
 
 export function ExerciseCardioForm(props: ExerciseCardioFormProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
-  useInitialFocus(inputRef);
+  useFocusOnMount(inputRef);
 
   function onAddSplits() {
-    props.onChange(addSplitsToExercise(props.data));
+    props.onChange({
+      ...props.data,
+      splits: [{ idx: Date.now(), distance: 0, duration: 0 }]
+    });
   }
 
   function onRemoveSplits() {
-    props.onChange(removeSplitsFromExercise(props.data));
+    props.onChange({
+      ...props.data,
+      splits: []
+    });
   }
 
   const hasSplits = props.data.splits.length > 0;
@@ -59,7 +37,7 @@ export function ExerciseCardioForm(props: ExerciseCardioFormProps) {
   return (
     <section className='flex flex-col'>
       <ExerciseTitleInput
-        value={props.data}
+        data={props.data}
         onChange={props.onChange}
         onDelete={props.onDelete}
       >
@@ -142,6 +120,19 @@ type SplitsFormProps = {
 };
 
 function SplitsForm(props: SplitsFormProps) {
+  function updateSplit<T extends keyof ExerciseSplit>(
+    key: T,
+    value: ExerciseSplit[T],
+    idx: number
+  ) {
+    return {
+      ...props.data,
+      splits: props.data.splits.map((split) => {
+        return split.idx === idx ? { ...split, [key]: value } : split;
+      })
+    };
+  }
+
   return (
     <>
       <div className='mt-4 mb-1.5 flex justify-between'>
@@ -151,7 +142,7 @@ function SplitsForm(props: SplitsFormProps) {
       {props.data.splits.map((split, index) => {
         function onChange(key: 'distance' | 'duration') {
           return (value: number) => {
-            props.onChange(updateSplit(props.data, key, value, split.idx));
+            props.onChange(updateSplit(key, value, split.idx));
           };
         }
 

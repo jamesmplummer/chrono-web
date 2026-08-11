@@ -1,4 +1,12 @@
-import { eachHourOfInterval, sub } from 'date-fns';
+import {
+  differenceInMilliseconds,
+  eachDayOfInterval,
+  eachHourOfInterval,
+  endOfMonth,
+  startOfMonth,
+  startOfYear,
+  sub
+} from 'date-fns';
 
 function getTimeZoneOffset(date: Date) {
   return minutesToHoursAndMinutes(date.getTimezoneOffset());
@@ -51,3 +59,81 @@ export const millisecondsToHoursAndMinutes = (milliseconds: number) => {
   if (minutes === 60) return { hours: hours + 1, minutes: 0 };
   return { hours, minutes };
 };
+
+export const timeOfDayToPercentage = (date: Date) => {
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const seconds = date.getSeconds();
+
+  const totalSeconds = (hours * 60 + minutes) * 60 + seconds;
+  const totalSecondsInDay = 24 * 60 * 60;
+
+  const percentage = (totalSeconds / totalSecondsInDay) * 100;
+  return percentage;
+};
+
+export const percentageToTimeOfDay = (percentage: number) => {
+  const totalSecondsInDay = 24 * 60 * 60;
+  const totalSeconds = Math.floor((percentage / 100) * totalSecondsInDay);
+
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds - hours * 3600) / 60);
+  const seconds = totalSeconds - hours * 3600 - minutes * 60;
+
+  const timeString = `T${hours.toString().padStart(2, '0')}:${minutes
+    .toString()
+    .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.000`;
+  return timeString;
+};
+
+export function prefixZero(n: number) {
+  if (n < 10 && n >= 0) {
+    return `0${n}`;
+  }
+  return n.toString();
+}
+
+export function buildLocalDatetime(
+  year: number,
+  month: number,
+  date: number,
+  time: string = '00:00:00.000'
+) {
+  return new Date(
+    `${year}-${prefixZero(month + 1)}-${prefixZero(date)}T${time}`
+  );
+}
+
+export function getYearMonthDayArray(
+  date: Date
+): readonly [number, number, number] {
+  return [date.getFullYear(), date.getMonth(), date.getDate()] as const;
+}
+
+export function getDatesInMonth(date: Date) {
+  const month = startOfMonth(date);
+  const year = startOfYear(date);
+
+  const monthInt = month.getMonth();
+  const yearInt = year.getFullYear();
+
+  const start = startOfMonth(new Date(yearInt, monthInt));
+  const end = endOfMonth(new Date(yearInt, monthInt));
+
+  const dates = eachDayOfInterval({ start, end });
+
+  return {
+    start,
+    end,
+    dates
+  };
+}
+
+export function getDurationText(start: string, end: string) {
+  if (!start || !end) return '';
+
+  const duration = differenceInMilliseconds(end, start);
+  const { hours, minutes } = millisecondsToHoursAndMinutes(duration);
+
+  return `[ Current Duration: ${hours}h ${minutes}m ]`;
+}

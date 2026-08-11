@@ -66,9 +66,16 @@ export type DerivedProperties = {
   startPercentage: number;
   endPercentage: number;
   width: number;
-  style: { left: number; width: number; backgroundColor: string };
+  style: { left: string; width: string };
   isStart: boolean;
   isEnd: boolean;
 };
 
 export type FormattedActivity = Activity & DerivedProperties;
+
+export type FormattedActivities = {
+  [key: DateId]: {
+    ids: FormattedActivity['id'][];
+    items: Record<FormattedActivity['id'], FormattedActivity>;
+  };
+};

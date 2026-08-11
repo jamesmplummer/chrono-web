@@ -20,6 +20,9 @@ import { TimelineRow } from '../components/timeline/TimelineRow';
 import { ActivityDefaultForm } from '../components/timeline/ActivityDefaultForm';
 import { ActivityExerciseForm } from '../components/timeline/ActivityExerciseForm';
 import type { ActivityVariant } from '../types/activity';
+import type { DateId } from '../types/date';
+import { useActivityKey } from '../hooks/activity/useActivityKey';
+import { useActivityData } from '../hooks/activity/useActivityData';
 
 type AddButtonProps = PropsWithChildren<HTMLAttributes<HTMLButtonElement>>;
 
@@ -37,69 +40,15 @@ const AddButton = forwardRef<HTMLButtonElement, AddButtonProps>(
   }
 );
 
-const today = new Date();
-const todayDateId = getDateId(today);
-const data = {
-  [`${todayDateId}`]: {
-    ids: ['1', '2', '3'],
-    items: {
-      '1': {
-        id: '1',
-        title: 'Cardio',
-        isStart: true,
-        isEnd: true,
-        style: {
-          left: 0,
-          width: '10%',
-          backgroundColor: 'red'
-        },
-        start: '2026-07-01T12:00:00.000',
-        end: '2026-07-01T15:00:00.000',
-        notes: 'notes'
-      },
-      '2': {
-        id: '2',
-        title: 'Mobility',
-        isStart: true,
-        isEnd: true,
-        style: {
-          left: '15%',
-          width: '20%',
-          backgroundColor: 'blue'
-        },
-        start: '2026-07-01T03:00:00.000',
-        end: '2026-07-01T15:00:00.000',
-        notes: 'notes'
-      },
-      '3': {
-        id: '3',
-        title: 'Exercise',
-        isStart: true,
-        isEnd: true,
-        style: {
-          left: '35%',
-          width: '40%',
-          backgroundColor: 'green'
-        },
-        start: '2026-07-01T00:00:00.000',
-        end: '2026-07-01T15:00:00.000',
-        notes: 'notes',
-        variant: 'Exercise',
-        exercise: []
-      }
-    }
-  }
-};
-
-const keys: Record<string, [number, string]> = {
-  cardio: [3900000, 'red'],
-  mobility: [4900000, 'blue'],
-  exercise: [6900000, 'green']
-};
-
 export function Timeline() {
-  const [activities, setActivities] = useState(data);
+  const { date, onChange } = useDateSelect();
+  const { dates } = useDatesInMonth(date);
+
+  const { activities } = useActivityData(date);
+  const keys = useActivityKey(date, activities);
+
   const [selectedActivityId, setSelectedActivityId] = useState<string>();
+  const [selectedDateId, setSelectedDateId] = useState<DateId>();
 
   const addOptionsRef = useRef<HTMLDivElement>(null);
   const addOptionsButtonRef = useRef<HTMLButtonElement>(null);
@@ -125,12 +74,13 @@ export function Timeline() {
     Exercise: onActivityExerciseToggle
   };
 
-  const { date, onChange } = useDateSelect();
-  const { dates } = useDatesInMonth(date);
-
-  function onItemClick(id: string, variant: ActivityVariant) {
-    setSelectedActivityId(id);
-    modalToggle[variant ?? 'Default']();
+  function getOnItemClick(date: Date) {
+    const dateId = getDateId(date);
+    return function onItemClick(id: string, variant: ActivityVariant) {
+      setSelectedActivityId(id);
+      setSelectedDateId(dateId);
+      modalToggle[variant ?? 'Default']();
+    };
   }
 
   return (
@@ -182,8 +132,8 @@ export function Timeline() {
             <ul className='mb-2 flex flex-1 flex-col'>
               {dates.map((date) => {
                 const dateId = getDateId(date);
-                const ids = activities[dateId]?.ids;
-                const items = activities[dateId]?.items;
+                const ids = activities?.[dateId]?.ids;
+                const items = activities?.[dateId]?.items;
                 return (
                   <li
                     key={date.toDateString()}
@@ -194,7 +144,7 @@ export function Timeline() {
                       date={date}
                       ids={ids}
                       items={items}
-                      onItemClick={onItemClick}
+                      onItemClick={getOnItemClick(date)}
                     />
                   </li>
                 );
@@ -211,8 +161,8 @@ export function Timeline() {
           onActivityDefaultClose();
         }}
         data={
-          selectedActivityId
-            ? activities[todayDateId].items[selectedActivityId]
+          selectedActivityId && selectedDateId
+            ? activities?.[selectedDateId]?.items[selectedActivityId]
             : undefined
         }
       />
@@ -224,8 +174,8 @@ export function Timeline() {
           onActivityExerciseClose();
         }}
         data={
-          selectedActivityId
-            ? activities[todayDateId].items[selectedActivityId]
+          selectedActivityId && selectedDateId
+            ? activities?.[selectedDateId]?.items[selectedActivityId]
             : undefined
         }
       />

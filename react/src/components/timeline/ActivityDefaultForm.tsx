@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { InputColor } from '../form/InputColor';
 import { InputDateTime } from '../form/InputDateTime';
 import { InputText } from '../form/InputText';
@@ -6,12 +6,14 @@ import { InputTextArea } from '../form/InputTextArea';
 import { DeleteIcon } from '../icon/icons';
 import { SidePanel } from '../layout/SidePanel';
 import { useFocusOnOpen } from '../../hooks/useFocusOnOpen';
-import type { ActivityBase } from '../../types/activity';
+import type { FormattedActivity } from '../../types/activity';
+import { getDurationText } from '../../utils/date';
+import { useUserContext } from '../../contexts/UserContext';
 
 export type ActivityDefaultFormProps = {
   open: boolean;
   onClose: () => void;
-  data?: ActivityBase;
+  data?: FormattedActivity;
 };
 
 export function ActivityDefaultForm({
@@ -19,6 +21,8 @@ export function ActivityDefaultForm({
   onClose,
   data
 }: ActivityDefaultFormProps) {
+  const user = useUserContext();
+
   const titleRef = useRef<HTMLInputElement | null>(null);
   useFocusOnOpen(titleRef, open);
 
@@ -27,6 +31,12 @@ export function ActivityDefaultForm({
   const [notes, setNotes] = useState<string>(data?.notes ?? '');
   const [start, setStart] = useState<string>(data?.start ?? '');
   const [end, setEnd] = useState<string>(data?.end ?? '');
+  const [color, setColor] = useState<string>('');
+
+  const derivedColor = useMemo(() => {
+    if (color) return color;
+    return user?.activities[data?.title ?? ''] ?? '';
+  }, [user, data, color]);
 
   useEffect(() => {
     if (open) {
@@ -35,6 +45,7 @@ export function ActivityDefaultForm({
       setNotes(data?.notes ?? '');
       setStart(data?.start ?? '');
       setEnd(data?.end ?? '');
+      setColor('');
     }
   }, [open]);
 
@@ -54,7 +65,7 @@ export function ActivityDefaultForm({
   }
 
   const titleText = data ? 'Update Activity' : 'Add Activity';
-  const descriptionExtraText = data ? '[ Current Duration: 0h 0m ]' : '';
+  const descriptionExtraText = getDurationText(start, end);
   const onSubmit = data ? onUpdate : onCreate;
   const submitButtonText = titleText;
   const onExtraButtonClick = data ? onDelete : undefined;
@@ -110,10 +121,7 @@ export function ActivityDefaultForm({
             value={end}
           />
         </div>
-        <InputColor
-          value={'#e5e5e5'}
-          onChange={(color) => console.log(color)}
-        />
+        <InputColor value={derivedColor} onChange={setColor} />
       </form>
     </SidePanel>
   );

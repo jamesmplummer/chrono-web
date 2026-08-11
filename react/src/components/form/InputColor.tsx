@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useModal } from '../../hooks/useModal';
 import { useDetectClickOutside } from '../../hooks/useDetectClickOutside';
-
-const DEFAULT_COLOR = '#e5e5e5';
+import { DEFAULT_COLOR } from '../../types/style';
 
 const colorMatrix = [
   [
@@ -40,7 +39,6 @@ export type InputColorProps = {
 };
 
 export function InputColor(props: InputColorProps) {
-  const [color, setColor] = useState(props.value);
   const [cursor, setCursor] = useState([0, 0]);
 
   const colorModalRef = useRef<HTMLDivElement>(null);
@@ -53,7 +51,6 @@ export function InputColor(props: InputColorProps) {
   });
 
   function onColorChange(color: string) {
-    setColor(color);
     props.onChange(color);
     onColorToggle();
   }
@@ -105,7 +102,7 @@ export function InputColor(props: InputColorProps) {
         onKeyUp={(e) => {
           if (e.key === 'Enter') onColorToggle();
         }}
-        style={{ backgroundColor: color }}
+        style={{ backgroundColor: props.value }}
         className='m-px mb-1 h-8 w-12 rounded-[3px] focus:border focus:border-slate-500 focus:outline-none'
       />
 

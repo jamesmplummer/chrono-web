@@ -40,8 +40,27 @@ export function useSetUserContext() {
   return useContext(SetUserContext);
 }
 
+// todo: remove
+const mockUser = {
+  id: '5f25a17b81fad94430820f38',
+  email: 'james@gmail.com',
+  role: 'admin',
+  activities: {
+    Exercise: '#04da00',
+    Cardio: '#b3b3b3',
+    Default: '#e5e5e5',
+    gaming: '#c00096',
+    work: '#ff00c7'
+  },
+  verified: true,
+  givenName: 'James',
+  familyName: 'Plummer',
+  img: '',
+  _refreshCheck: Date.now()
+};
+
 export function UserProvider(props: PropsWithChildren) {
-  const [user, setUser] = useState<UserContextType>(null);
+  const [user, setUser] = useState<UserContextType>(mockUser);
 
   const updateUser = useCallback((args: Partial<User>) => {
     setUser((prev) => {

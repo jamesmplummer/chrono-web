@@ -5,7 +5,7 @@ import type {
   ExerciseMobility,
   Exercise,
   ExerciseVariant,
-  ExerciseActivity
+  FormattedActivity
 } from '../../types/activity';
 import { InputDateTime } from '../form/InputDateTime';
 import { InputTextArea } from '../form/InputTextArea';
@@ -21,6 +21,7 @@ import { ExerciseMobilityForm } from './ExerciseMobilityForm';
 import { ExerciseCardioForm } from './ExerciseCardioForm';
 import { useFocusOnOpen } from '../../hooks/useFocusOnOpen';
 import { ExerciseStrengthForm } from './ExerciseStrengthForm';
+import { getDurationText } from '../../utils/date';
 
 type AddExerciseTypeButtonProps = PropsWithChildren<{
   onClick: () => void;
@@ -79,7 +80,7 @@ const exerciseDefaultValue = {
 export type ActivityExerciseFormProps = {
   open: boolean;
   onClose: () => void;
-  data?: ExerciseActivity;
+  data?: FormattedActivity;
 };
 
 export function ActivityExerciseForm({
@@ -127,7 +128,7 @@ export function ActivityExerciseForm({
   }
 
   const titleText = data ? 'Update Exercise' : 'Add Exercise';
-  const descriptionExtraText = data ? '[ Current Duration: 0h 0m ]' : '';
+  const descriptionExtraText = getDurationText(start, end);
   const onSubmit = data ? onUpdate : onCreate;
   const submitButtonText = titleText;
   const onExtraButtonClick = data ? onDelete : undefined;

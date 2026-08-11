@@ -1,6 +1,7 @@
 import { isToday } from 'date-fns';
 import { useRef, useEffect } from 'react';
 import type { ActivityVariant, FormattedActivity } from '../../types/activity';
+import { useUserContext } from '../../contexts/UserContext';
 
 export type TimelineRowProps = {
   date: Date;
@@ -10,6 +11,7 @@ export type TimelineRowProps = {
 };
 
 export function TimelineRow(props: TimelineRowProps) {
+  const user = useUserContext();
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -28,8 +30,11 @@ export function TimelineRow(props: TimelineRowProps) {
           <div
             key={item.id}
             onClick={() => props.onItemClick?.(id, item.variant)}
-            className='absolute flex h-full cursor-pointer overflow-hidden rounded-sm py-0.5'
-            style={item.style}
+            className='absolute flex h-full cursor-pointer overflow-hidden rounded-sm bg-red-500 py-0.5'
+            style={{
+              ...item.style,
+              backgroundColor: user?.activities[item.title]
+            }}
           />
         );
       })}

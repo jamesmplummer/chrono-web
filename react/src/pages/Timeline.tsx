@@ -10,8 +10,6 @@ import { Page } from '../components/layout/Page';
 import { useModal } from '../hooks/useModal';
 import { useDetectClickOutside } from '../hooks/useDetectClickOutside';
 import { getDateId } from '../utils/date';
-import { useDateSelect } from '../hooks/useDateSelect';
-import { useDatesInMonth } from '../hooks/useDatesInMonth';
 import { Key } from '../components/timeline/Key';
 import { InputMonthYear } from '../components/form/InputMonthYear';
 import { TimelineHeaderRow } from '../components/timeline/TimelineHeaderRow';
@@ -22,29 +20,15 @@ import { ActivityExerciseForm } from '../components/timeline/ActivityExerciseFor
 import type { ActivityVariant } from '../types/activity';
 import type { DateId } from '../types/date';
 import { useActivityKey } from '../hooks/activity/useActivityKey';
-import { useActivityData } from '../hooks/activity/useActivityData';
-
-type AddButtonProps = PropsWithChildren<HTMLAttributes<HTMLButtonElement>>;
-
-const AddButton = forwardRef<HTMLButtonElement, AddButtonProps>(
-  ({ children, ...props }, ref) => {
-    return (
-      <button
-        {...props}
-        ref={ref}
-        className={`flex h-14 w-14 cursor-pointer items-center justify-center rounded-full shadow-lg shadow-slate-700/20 focus:outline-slate-700 ${props.className}`}
-      >
-        {children}
-      </button>
-    );
-  }
-);
+import {
+  useActivityContext,
+  useActivityDateContext
+} from '../contexts/ActivityContext';
 
 export function Timeline() {
-  const { date, onChange } = useDateSelect();
-  const { dates } = useDatesInMonth(date);
+  const { date, datesInMonth, onChange } = useActivityDateContext();
+  const activities = useActivityContext();
 
-  const { activities } = useActivityData(date);
   const keys = useActivityKey(date, activities);
 
   const [selectedActivityId, setSelectedActivityId] = useState<string>();
@@ -130,7 +114,7 @@ export function Timeline() {
           <TimelineHeaderRow />
           <section className='flex flex-1 cursor-default'>
             <ul className='mb-2 flex flex-1 flex-col'>
-              {dates.map((date) => {
+              {datesInMonth.map((date) => {
                 const dateId = getDateId(date);
                 const ids = activities?.[dateId]?.ids;
                 const items = activities?.[dateId]?.items;
@@ -182,3 +166,19 @@ export function Timeline() {
     </Page>
   );
 }
+
+type AddButtonProps = PropsWithChildren<HTMLAttributes<HTMLButtonElement>>;
+
+const AddButton = forwardRef<HTMLButtonElement, AddButtonProps>(
+  ({ children, ...props }, ref) => {
+    return (
+      <button
+        {...props}
+        ref={ref}
+        className={`flex h-14 w-14 cursor-pointer items-center justify-center rounded-full shadow-lg shadow-slate-700/20 focus:outline-slate-700 ${props.className}`}
+      >
+        {children}
+      </button>
+    );
+  }
+);

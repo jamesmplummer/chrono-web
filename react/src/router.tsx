@@ -4,6 +4,7 @@ import { Login } from './pages/Login.tsx';
 import { Timeline } from './pages/Timeline.tsx';
 import { routeDef } from './utils/routes.tsx';
 import { Settings } from './pages/Settings.tsx';
+import { ActivityProvider } from './contexts/ActivityContext.tsx';
 
 function PrivateRoute() {
   const auth = { token: true };
@@ -16,7 +17,14 @@ export function Router() {
       <Routes>
         <Route index path={routeDef.login.url} element={<Login />} />
         <Route element={<PrivateRoute />}>
-          <Route path={routeDef.timeline.url} element={<Timeline />} />
+          <Route
+            path={routeDef.timeline.url}
+            element={
+              <ActivityProvider>
+                <Timeline />
+              </ActivityProvider>
+            }
+          />
           <Route path={routeDef.settings.url} element={<Settings />} />
         </Route>
       </Routes>

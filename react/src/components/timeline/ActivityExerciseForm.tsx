@@ -23,32 +23,6 @@ import { useFocusOnOpen } from '../../hooks/useFocusOnOpen';
 import { ExerciseStrengthForm } from './ExerciseStrengthForm';
 import { getDurationText } from '../../utils/date';
 
-type AddExerciseTypeButtonProps = PropsWithChildren<{
-  onClick: () => void;
-}>;
-
-function AddExerciseTypeButton(props: AddExerciseTypeButtonProps) {
-  function onClick(e: React.MouseEvent<HTMLButtonElement>) {
-    e.preventDefault();
-    props.onClick();
-  }
-
-  return (
-    <button
-      className='relative mr-1.5 cursor-pointer rounded-[4px] p-1 focus:outline focus:outline-1 focus:outline-slate-500'
-      onClick={onClick}
-    >
-      <div className='flex h-9 w-9 items-center justify-center rounded-[5px] bg-slate-700 p-[3px] text-slate-50'>
-        {props.children}
-      </div>
-      <AddIcon
-        className='absolute top-0 right-0 z-10 flex items-center justify-center rounded-[3px] border-[0.5px] border-slate-700 bg-slate-500 p-px text-white'
-        size='16'
-      />
-    </button>
-  );
-}
-
 const exerciseDefaultValue = {
   Strength: {
     variant: 'Strength',
@@ -236,5 +210,31 @@ export function ActivityExerciseForm({
         />
       </form>
     </SidePanel>
+  );
+}
+
+type AddExerciseTypeButtonProps = PropsWithChildren<{
+  onClick: () => void;
+}>;
+
+function AddExerciseTypeButton(props: AddExerciseTypeButtonProps) {
+  function onClick(e: React.MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
+    props.onClick();
+  }
+
+  return (
+    <button
+      className='relative mr-1.5 cursor-pointer rounded-[4px] p-1 focus:outline focus:outline-1 focus:outline-slate-500'
+      onClick={onClick}
+    >
+      <div className='flex h-9 w-9 items-center justify-center rounded-[5px] bg-slate-700 p-[3px] text-slate-50'>
+        {props.children}
+      </div>
+      <AddIcon
+        className='absolute top-0 right-0 z-10 flex items-center justify-center rounded-[3px] border-[0.5px] border-slate-700 bg-slate-500 p-px text-white'
+        size='16'
+      />
+    </button>
   );
 }

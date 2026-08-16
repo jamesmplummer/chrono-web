@@ -179,7 +179,7 @@ export function ActivityDefaultForm({
           value={notes}
         />
         <div className='my-1'>
-          <div className='flex justify-between gap-4'>
+          <div className='flex justify-between'>
             <InputDateTime
               required
               label='Start'

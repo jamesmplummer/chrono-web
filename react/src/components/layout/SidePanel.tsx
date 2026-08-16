@@ -3,9 +3,9 @@ import { CloseIcon, SubmitIcon, type IconComponent } from '../icon/icons';
 import { Icon } from '@mdi/react';
 import { memo } from 'react';
 
-export const DefaultTitleIcon: IconComponent = (props) => {
+export const DefaultTitleIcon: IconComponent = memo((props) => {
   return <Icon size='36' {...props} path={mdiTimelapse} />;
-};
+});
 
 export type SidePanelProps = {
   open: boolean;
@@ -75,14 +75,7 @@ export function SidePanel({
         />
       </div>
 
-      <div
-        onClick={onClose}
-        className={`${
-          open
-            ? 'w-full opacity-20 [transition:opacity_0.2s_cubic-bezier(0.4,0,0.2,1)_0s]'
-            : 'w-0 opacity-0 [transition:width,_0s,_linear,_1s,opacity_0.2s_cubic-bezier(0.4,0,0.2,1)_0s]'
-        } fixed z-30 h-full bg-black`}
-      />
+      <Backdrop open={open} onClose={onClose} />
     </>
   );
 }
@@ -212,3 +205,21 @@ const Actions = memo(
     );
   }
 );
+
+type BackdropProps = {
+  open: boolean;
+  onClose: () => void;
+};
+
+const Backdrop = memo(({ open, onClose }: BackdropProps) => {
+  return (
+    <div
+      onClick={onClose}
+      className={`${
+        open
+          ? 'w-full opacity-20 [transition:opacity_0.2s_cubic-bezier(0.4,0,0.2,1)_0s]'
+          : 'w-0 opacity-0 [transition:width,_0s,_linear,_1s,opacity_0.2s_cubic-bezier(0.4,0,0.2,1)_0s]'
+      } fixed z-30 h-full bg-black`}
+    />
+  );
+});

@@ -35,14 +35,6 @@ export function Timeline() {
   const [selectedActivityId, setSelectedActivityId] = useState<string>();
   const [selectedDateId, setSelectedDateId] = useState<DateId>();
 
-  const addOptionsRef = useRef<HTMLDivElement>(null);
-  const addOptionsButtonRef = useRef<HTMLButtonElement>(null);
-  const { addOptionsOpen, onAddOptionsToggle } = useModal('addOptions');
-  useDetectClickOutside(
-    [addOptionsRef, addOptionsButtonRef],
-    onAddOptionsToggle
-  );
-
   const {
     activityDefaultOpen,
     onActivityDefaultToggle,
@@ -76,39 +68,14 @@ export function Timeline() {
           <InputMonthYear value={date} onChange={onChange} />
         </section>
 
-        <AddButton
-          id='create-activity-button'
-          ref={addOptionsButtonRef}
-          onClick={onAddOptionsToggle}
-          className='fixed right-2 bottom-16 z-20 bg-slate-900'
-        >
-          <AddIcon size='32' className='text-slate-50' />
-        </AddButton>
-        {addOptionsOpen && (
-          <div
-            ref={addOptionsRef}
-            className='fixed right-2 bottom-[132px] z-10 flex gap-3'
-          >
-            <AddButton
-              id='create-exercise'
-              onClick={onActivityExerciseToggle}
-              className='bg-slate-700'
-            >
-              <StrengthIcon size='32' className='text-slate-100' />
-            </AddButton>
-            <AddButton
-              id='create-activity'
-              onClick={onActivityDefaultToggle}
-              className='bg-slate-800'
-            >
-              <AddIcon size='32' className='text-slate-50' />
-            </AddButton>
-          </div>
-        )}
-
         <TimelineContent
           datesInMonth={datesInMonth}
           makeOnItemClick={makeOnItemClick}
+        />
+
+        <AddButtons
+          onActivityDefaultToggle={onActivityDefaultToggle}
+          onActivityExerciseToggle={onActivityExerciseToggle}
         />
       </div>
 
@@ -153,6 +120,57 @@ const AddButton = forwardRef<HTMLButtonElement, AddButtonProps>(
       >
         {children}
       </button>
+    );
+  }
+);
+
+type AddButtonsProps = {
+  onActivityDefaultToggle: () => void;
+  onActivityExerciseToggle: () => void;
+};
+
+const AddButtons = memo(
+  ({ onActivityDefaultToggle, onActivityExerciseToggle }: AddButtonsProps) => {
+    const addOptionsRef = useRef<HTMLDivElement>(null);
+    const addOptionsButtonRef = useRef<HTMLButtonElement>(null);
+    const { addOptionsOpen, onAddOptionsToggle } = useModal('addOptions');
+    useDetectClickOutside(
+      [addOptionsRef, addOptionsButtonRef],
+      onAddOptionsToggle
+    );
+
+    return (
+      <>
+        <AddButton
+          id='create-activity-button'
+          ref={addOptionsButtonRef}
+          onClick={onAddOptionsToggle}
+          className='fixed right-2 bottom-16 z-20 bg-slate-900'
+        >
+          <AddIcon size='32' className='text-slate-50' />
+        </AddButton>
+        {addOptionsOpen && (
+          <div
+            ref={addOptionsRef}
+            className='fixed right-2 bottom-[132px] z-10 flex gap-3'
+          >
+            <AddButton
+              id='create-exercise'
+              onClick={onActivityExerciseToggle}
+              className='bg-slate-700'
+            >
+              <StrengthIcon size='32' className='text-slate-100' />
+            </AddButton>
+            <AddButton
+              id='create-activity'
+              onClick={onActivityDefaultToggle}
+              className='bg-slate-800'
+            >
+              <AddIcon size='32' className='text-slate-50' />
+            </AddButton>
+          </div>
+        )}
+      </>
     );
   }
 );

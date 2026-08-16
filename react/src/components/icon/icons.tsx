@@ -17,6 +17,7 @@ import {
   mdiTimerCheckOutline
 } from '@mdi/js';
 import { Icon } from '@mdi/react';
+import { memo } from 'react';
 
 type IconProps = Parameters<typeof Icon>[0];
 type IconPropsWithoutPath = Omit<IconProps, 'path'>;
@@ -25,66 +26,66 @@ export type IconComponent = (
   props: IconPropsWithoutPath
 ) => ReturnType<typeof Icon>;
 
-export const Logo: IconComponent = (props) => {
+export const Logo: IconComponent = memo((props) => {
   return <Icon size={1} {...props} path={mdiTimerCheckOutline} />;
-};
+});
 
-export const AddIcon: IconComponent = (props) => {
+export const AddIcon: IconComponent = memo((props) => {
   return <Icon size={1} {...props} path={mdiPlus} />;
-};
+});
 
-export const CardioIcon: IconComponent = (props) => {
+export const CardioIcon: IconComponent = memo((props) => {
   return <Icon size={1} {...props} path={mdiRun} />;
-};
+});
 
-export const CloseIcon: IconComponent = (props) => {
+export const CloseIcon: IconComponent = memo((props) => {
   return <Icon size={1} {...props} path={mdiClose} />;
-};
+});
 
-export const DateIcon: IconComponent = (props) => {
+export const DateIcon: IconComponent = memo((props) => {
   return <Icon size={1} {...props} path={mdiCalendarFilter} />;
-};
+});
 
-export const DeleteIcon: IconComponent = (props) => {
+export const DeleteIcon: IconComponent = memo((props) => {
   return <Icon size={1} {...props} path={mdiDelete} />;
-};
+});
 
-export const LeftIcon: IconComponent = (props) => {
+export const LeftIcon: IconComponent = memo((props) => {
   return <Icon size={1} {...props} path={mdiChevronLeft} />;
-};
+});
 
-export const LogoutIcon: IconComponent = (props) => {
+export const LogoutIcon: IconComponent = memo((props) => {
   return <Icon size={1} {...props} path={mdiLogout} />;
-};
+});
 
-export const KeyIcon: IconComponent = (props) => {
+export const KeyIcon: IconComponent = memo((props) => {
   return <Icon size={1} {...props} path={mdiChartLineVariant} />;
-};
+});
 
-export const MobilityIcon: IconComponent = (props) => {
+export const MobilityIcon: IconComponent = memo((props) => {
   return <Icon size={1} {...props} path={mdiMeditation} />;
-};
+});
 
-export const RightIcon: IconComponent = (props) => {
+export const RightIcon: IconComponent = memo((props) => {
   return <Icon size={1} {...props} path={mdiChevronRight} />;
-};
+});
 
-export const SettingsIcon: IconComponent = (props) => {
+export const SettingsIcon: IconComponent = memo((props) => {
   return <Icon size={1} {...props} path={mdiCog} />;
-};
+});
 
-export const StrengthIcon: IconComponent = (props) => {
+export const StrengthIcon: IconComponent = memo((props) => {
   return <Icon size={1} {...props} path={mdiDumbbell} />;
-};
+});
 
-export const SubmitIcon: IconComponent = (props) => {
+export const SubmitIcon: IconComponent = memo((props) => {
   return <Icon size={1} {...props} path={mdiCheck} />;
-};
+});
 
-export const TimelineIcon: IconComponent = (props) => {
+export const TimelineIcon: IconComponent = memo((props) => {
   return <Icon size={1} {...props} path={mdiChartGantt} />;
-};
+});
 
-export const UserIcon: IconComponent = (props) => {
+export const UserIcon: IconComponent = memo((props) => {
   return <Icon size={1} {...props} path={mdiAccount} />;
-};
+});

@@ -3,7 +3,8 @@ import {
   type HTMLAttributes,
   type PropsWithChildren,
   forwardRef,
-  useState
+  useState,
+  memo
 } from 'react';
 import { AddIcon, StrengthIcon } from '../components/icon/icons';
 import { Page } from '../components/layout/Page';
@@ -58,7 +59,7 @@ export function Timeline() {
     Exercise: onActivityExerciseToggle
   };
 
-  function getOnItemClick(date: Date) {
+  function makeOnItemClick(date: Date) {
     const dateId = getDateId(date);
     return function onItemClick(id: string, variant: ActivityVariant) {
       setSelectedActivityId(id);
@@ -71,13 +72,8 @@ export function Timeline() {
     <Page>
       <div className='relative flex flex-1 flex-col bg-white'>
         <section className='mx-3 mt-3 flex items-start justify-between'>
-          <div>
-            <Key values={keys} />
-          </div>
-
-          <div className='flex'>
-            <InputMonthYear value={date} onChange={onChange} />
-          </div>
+          <Key values={keys} />
+          <InputMonthYear value={date} onChange={onChange} />
         </section>
 
         <AddButton
@@ -110,32 +106,10 @@ export function Timeline() {
           </div>
         )}
 
-        <section className='bg-slate-white flex flex-col pt-2 pr-2 pl-1 sm:p-4'>
-          <TimelineHeaderRow />
-          <section className='flex flex-1 cursor-default'>
-            <ul className='mb-2 flex flex-1 flex-col'>
-              {datesInMonth.map((date) => {
-                const dateId = getDateId(date);
-                const ids = activities?.[dateId]?.ids;
-                const items = activities?.[dateId]?.items;
-                return (
-                  <li
-                    key={date.toDateString()}
-                    className='flex w-full flex-row'
-                  >
-                    <TimelineDateLabel date={date} />
-                    <TimelineRow
-                      date={date}
-                      ids={ids}
-                      items={items}
-                      onItemClick={getOnItemClick(date)}
-                    />
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-        </section>
+        <TimelineContent
+          datesInMonth={datesInMonth}
+          makeOnItemClick={makeOnItemClick}
+        />
       </div>
 
       <ActivityDefaultForm
@@ -179,6 +153,53 @@ const AddButton = forwardRef<HTMLButtonElement, AddButtonProps>(
       >
         {children}
       </button>
+    );
+  }
+);
+
+type TimelineContentProps = {
+  datesInMonth: Date[];
+  makeOnItemClick: (
+    date: Date
+  ) => (id: string, variant: ActivityVariant) => void;
+};
+
+const TimelineContent = memo(
+  (props: TimelineContentProps) => {
+    const activities = useActivityContext();
+
+    return (
+      <section className='bg-slate-white flex flex-col pt-2 pr-2 pl-1 sm:p-4'>
+        <TimelineHeaderRow />
+        <section className='flex flex-1 cursor-default'>
+          <ul className='mb-2 flex flex-1 flex-col'>
+            {props.datesInMonth.map((date) => {
+              const dateId = getDateId(date);
+              const ids = activities?.[dateId]?.ids;
+              const items = activities?.[dateId]?.items;
+              return (
+                <li key={date.toDateString()} className='flex w-full flex-row'>
+                  <TimelineDateLabel date={date} />
+                  <TimelineRow
+                    date={date}
+                    ids={ids}
+                    items={items}
+                    onItemClick={props.makeOnItemClick(date)}
+                  />
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      </section>
+    );
+  },
+  (prev, next) => {
+    return (
+      prev.datesInMonth.length === next.datesInMonth.length &&
+      prev.datesInMonth.every(
+        (date, i) => date.getTime() === next.datesInMonth[i].getTime()
+      )
     );
   }
 );

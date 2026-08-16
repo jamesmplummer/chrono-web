@@ -222,7 +222,7 @@ function mockGetActivities({
   end: string;
 }): Promise<Activity[]> {
   const startDate = new Date(start);
-  if (startDate.getMonth() !== 6) return Promise.resolve([]);
+  if (startDate.getMonth() !== 7) return Promise.resolve([]);
   return Promise.resolve([
     {
       id: '1',
@@ -230,8 +230,8 @@ function mockGetActivities({
       variant: 'Exercise',
       group: 'exercise',
       notes: undefined,
-      start: '2026-07-01T12:00:00.000',
-      end: '2026-07-01T15:00:00.000',
+      start: '2026-08-01T12:00:00.000',
+      end: '2026-08-01T15:00:00.000',
       timezone: 0,
       createdAt: '2020-08-01T17:12:43.957Z',
       user: '5f25a17b81fad94430820f38',
@@ -290,8 +290,8 @@ function mockGetActivities({
       variant: 'Default',
       group: 'work',
       notes: undefined,
-      start: '2026-07-01T03:00:00.000',
-      end: '2026-07-01T12:00:00.000',
+      start: '2026-08-01T03:00:00.000',
+      end: '2026-08-01T12:00:00.000',
       timezone: 0,
       createdAt: '2020-08-01T17:12:43.957Z',
       user: '5f25a17b81fad94430820f38',

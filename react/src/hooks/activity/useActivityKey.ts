@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useUserContext } from '../../contexts/UserContext';
 import type { FormattedActivities } from '../../types/activity';
 import { DEFAULT_COLOR } from '../../types/style';
@@ -6,46 +7,49 @@ import { getDatesInMonth, buildLocalDatetime } from '../../utils/date';
 
 export function useActivityKey(date: Date, activities?: FormattedActivities) {
   const user = useUserContext();
-  if (!activities || !user) return {};
-
   const { start, end } = getDatesInMonth(date);
-  const key: Record<string, [number, string]> = {};
-  const seenIds: Record<string, boolean> = {};
 
-  const localStart = buildLocalDatetime(
-    start.getFullYear(),
-    start.getMonth(),
-    start.getDate(),
-    '00:00:00.000'
-  ).getTime();
-  const localEnd = buildLocalDatetime(
-    end.getFullYear(),
-    end.getMonth(),
-    end.getDate(),
-    '23:59:59.999'
-  ).getTime();
+  return useMemo(() => {
+    if (!activities || !user) return {};
 
-  for (const date of ObjectKeys(activities)) {
-    for (const id of activities?.[date]?.ids ?? []) {
-      const activity = activities[date]?.items[id];
-      if (!activity) continue;
-      if (seenIds[activity.id]) continue;
+    const key: Record<string, [number, string]> = {};
+    const seenIds: Record<string, boolean> = {};
 
-      let start = new Date(activity.start).getTime();
-      let end = new Date(activity.end).getTime();
+    const localStart = buildLocalDatetime(
+      start.getFullYear(),
+      start.getMonth(),
+      start.getDate(),
+      '00:00:00.000'
+    ).getTime();
+    const localEnd = buildLocalDatetime(
+      end.getFullYear(),
+      end.getMonth(),
+      end.getDate(),
+      '23:59:59.999'
+    ).getTime();
 
-      start = start < localStart ? localStart : start;
-      end = end > localEnd ? localEnd : end;
+    for (const date of ObjectKeys(activities)) {
+      for (const id of activities?.[date]?.ids ?? []) {
+        const activity = activities[date]?.items[id];
+        if (!activity) continue;
+        if (seenIds[activity.id]) continue;
 
-      const duration = end - start;
+        let start = new Date(activity.start).getTime();
+        let end = new Date(activity.end).getTime();
 
-      key[activity.title] = [
-        duration + (key[activity.title]?.[0] ?? 0),
-        user.activities?.[activity.title] ?? DEFAULT_COLOR
-      ];
-      seenIds[activity.id] = true;
+        start = start < localStart ? localStart : start;
+        end = end > localEnd ? localEnd : end;
+
+        const duration = end - start;
+
+        key[activity.title] = [
+          duration + (key[activity.title]?.[0] ?? 0),
+          user.activities?.[activity.title] ?? DEFAULT_COLOR
+        ];
+        seenIds[activity.id] = true;
+      }
     }
-  }
 
-  return key;
+    return key;
+  }, [activities, date, user]);
 }

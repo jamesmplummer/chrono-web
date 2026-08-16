@@ -17,6 +17,14 @@ import {
   getDatesInMonth
 } from '../utils/date';
 import { useDateSelect } from '../hooks/useDateSelect';
+import { useQuery } from '../hooks/useQuery';
+import type {
+  PostActivityPayload,
+  PatchActivityParams,
+  PatchActivityPayload,
+  DeleteActivityParams
+} from '../api/activity';
+import { useSetUserContext, useUserContext } from './UserContext';
 
 type ActivityContextType = FormattedActivities | undefined;
 
@@ -44,12 +52,31 @@ const defaultActivityDataContext = {
   getActivities: () => Promise.resolve()
 };
 
+type ActivityMutationContextType = {
+  createActivity: (payload: PostActivityPayload) => void;
+  updateActivity: (
+    params: PatchActivityParams,
+    payload: PatchActivityPayload
+  ) => void;
+  deleteActivity: (params: DeleteActivityParams) => void;
+};
+
+const defaultActivityMutationContext = {
+  createActivity: () => {},
+  updateActivity: () => {},
+  deleteActivity: () => {}
+};
+
 const ActivityContext = createContext<ActivityContextType>(undefined);
 const ActivityDateContext = createContext<ActivityDateContextType>(
   defaultActivityDateContext
 );
 const ActivityDataContext = createContext<ActivityDataContextType>(
   defaultActivityDataContext
+);
+
+const ActivityMutationContext = createContext<ActivityMutationContextType>(
+  defaultActivityMutationContext
 );
 
 export function useActivityContext() {
@@ -64,10 +91,13 @@ export function useActivityDataContext() {
   return useContext(ActivityDataContext);
 }
 
+export function useActivityMutationContext() {
+  return useContext(ActivityMutationContext);
+}
+
 export function ActivityProvider(props: PropsWithChildren) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error>();
-  const [_activities, setActivities] = useState<Activity[]>();
+  const user = useUserContext();
+  const { updateUserActivityColor } = useSetUserContext();
   const [derivedActivities, setDerivedActivities] =
     useState<DerivedActivities>();
 
@@ -77,10 +107,9 @@ export function ActivityProvider(props: PropsWithChildren) {
     return getDatesInMonth(date).dates;
   }, [date]);
 
-  const getActivities = useCallback(
+  const getActivitiesQuery = useCallback(
     async (date: Date) => {
-      setLoading(true);
-      setError(undefined);
+      if (!user) return;
 
       const rawDate = new Date(date.getFullYear(), date.getMonth());
       const startDate = applyTZOffset(startOfMonth(rawDate));
@@ -97,12 +126,47 @@ export function ActivityProvider(props: PropsWithChildren) {
       const query = { start, end };
       const activities = await mockGetActivities(query);
 
-      setActivities(activities);
-      setDerivedActivities(new DerivedActivities(dates, activities));
-      setLoading(false);
-      setError(undefined);
+      setDerivedActivities(new DerivedActivities(dates, activities, user));
     },
     [dates]
+  );
+
+  const [getActivities, { loading, error }] = useQuery(getActivitiesQuery);
+
+  const createActivity = useCallback(
+    (payload: PostActivityPayload) => {
+      if (!derivedActivities) return;
+      const tempId = `temp-${payload.start}${payload.end}`;
+      derivedActivities.create(tempId, payload);
+      updateUserActivityColor(payload.title, payload.color);
+
+      // todo: api call
+      // todo: error rollback behavior
+    },
+    [derivedActivities]
+  );
+
+  const updateActivity = useCallback(
+    (params: PatchActivityParams, payload: PatchActivityPayload) => {
+      if (!derivedActivities) return;
+      derivedActivities.update(params, payload);
+      updateUserActivityColor(payload.title, payload.color);
+
+      // todo: api call
+      // todo: error rollback behavior
+    },
+    [derivedActivities]
+  );
+
+  const deleteActivity = useCallback(
+    (params: DeleteActivityParams) => {
+      if (!derivedActivities) return;
+      derivedActivities.delete(params);
+
+      // todo: api call
+      // todo: error rollback behavior
+    },
+    [derivedActivities]
   );
 
   useEffect(() => {
@@ -129,11 +193,21 @@ export function ActivityProvider(props: PropsWithChildren) {
     };
   }, [loading, error, getActivities]);
 
+  const activityMutationContext = useMemo(() => {
+    return {
+      createActivity,
+      updateActivity,
+      deleteActivity
+    };
+  }, [createActivity, updateActivity, deleteActivity]);
+
   return (
     <ActivityContext value={activityContext}>
       <ActivityDateContext value={activityDateContext}>
         <ActivityDataContext value={activityDataContext}>
-          {props.children}
+          <ActivityMutationContext value={activityMutationContext}>
+            {props.children}
+          </ActivityMutationContext>
         </ActivityDataContext>
       </ActivityDateContext>
     </ActivityContext>

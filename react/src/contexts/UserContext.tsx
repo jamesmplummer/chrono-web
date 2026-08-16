@@ -26,11 +26,18 @@ type UserContextType = User | null;
 type SetUserContextType = {
   setUser: (user: User) => void;
   updateUser: (args: Partial<User>) => void;
-  updateUserActivityColor: (title: string, color: string) => void;
-} | null;
+  updateUserActivityColor: (title: string, color?: string) => void;
+};
 
 const UserContext = createContext<UserContextType>(null);
-const SetUserContext = createContext<SetUserContextType>(null);
+
+const defaultSetUserContext = {
+  setUser: () => {},
+  updateUser: () => {},
+  updateUserActivityColor: () => {}
+} as const;
+
+const SetUserContext = createContext<SetUserContextType>(defaultSetUserContext);
 
 export function useUserContext() {
   return useContext(UserContext);
@@ -71,11 +78,15 @@ export function UserProvider(props: PropsWithChildren) {
   }, []);
 
   const updateUserActivityColor = useCallback(
-    (title: string, color: string) => {
+    (title: string, color?: string) => {
       setUser((prev) => {
+        if (!color) return prev;
         if (!prev) throw new Error('User not found, unable to update');
+
         const prevColor = prev.activities[title];
-        if (prevColor !== color) prev.activities[title] = color;
+        if (prevColor === color) return prev;
+
+        prev.activities[title] = color;
         return { ...prev };
       });
     },

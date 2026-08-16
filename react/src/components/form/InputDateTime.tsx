@@ -15,6 +15,7 @@ export const InputDateTime = forwardRef<HTMLInputElement, InputDateTimeProps>(
   (props, ref) => {
     const id =
       props.id ?? `${props.label.toLowerCase().replace(' ', '-')}-input`;
+
     return (
       <div className='flex flex-1 flex-col'>
         <label htmlFor={id} className='mt-2 mb-1 w-full text-xs'>

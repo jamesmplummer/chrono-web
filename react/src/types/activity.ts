@@ -1,5 +1,7 @@
 import type { DateId } from './date';
 
+export type ActivityId = string;
+
 export type ExerciseVariant = 'Strength' | 'Cardio' | 'Mobility';
 export type ActivityVariant = 'Default' | 'Exercise';
 
@@ -43,8 +45,13 @@ export type ActivityExerciseData = {
   exercise: Exercise[];
 };
 
+export type ActivityData = {
+  Exercise: ActivityExerciseData;
+  Default: undefined;
+};
+
 export type ActivityBase = {
-  id: string;
+  id: ActivityId;
   title: string;
   variant: ActivityVariant;
   group: string;
@@ -75,7 +82,7 @@ export type FormattedActivity = Activity & DerivedProperties;
 
 export type FormattedActivities = {
   [key: DateId]: {
-    ids: FormattedActivity['id'][];
-    items: Record<FormattedActivity['id'], FormattedActivity>;
+    ids: ActivityId[];
+    items: Record<ActivityId, FormattedActivity>;
   };
 };

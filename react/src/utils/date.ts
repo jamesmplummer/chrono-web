@@ -135,5 +135,12 @@ export function getDurationText(start: string, end: string) {
   const duration = differenceInMilliseconds(end, start);
   const { hours, minutes } = millisecondsToHoursAndMinutes(duration);
 
-  return `[ Current Duration: ${hours}h ${minutes}m ]`;
+  const hStr = hours > 0 ? `${hours}h` : '';
+  const mStr = minutes > 0 ? `${minutes}m` : '';
+
+  return `[ Current Duration: ${hStr} ${mStr} ]`;
+}
+
+export function getTimezoneOffset() {
+  return new Date().getTimezoneOffset();
 }

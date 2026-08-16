@@ -1,10 +1,12 @@
 import { forwardRef } from 'react';
+import { InputErrorLine } from './InputErrorLine';
 
 export type InputTextProps = {
   label: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   value: string;
   id?: string;
+  error?: string;
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
   placeholder?: string;
   required?: boolean;
@@ -39,6 +41,7 @@ export const InputText = forwardRef<HTMLInputElement, InputTextProps>(
           value={props.value}
           className={`h-10 rounded-[3px] border border-slate-200 bg-white px-2 py-1 text-sm/[24px] text-slate-700 placeholder:font-light placeholder:text-slate-400/70 focus:border-slate-500 focus:outline-none sm:h-9 ${props.valid === false ? 'border-red-600' : ''}`}
         />
+        {props.error && <InputErrorLine error={props.error} />}
       </>
     );
   }

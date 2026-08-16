@@ -1,12 +1,17 @@
 import { add, differenceInDays, startOfDay } from 'date-fns';
 import type {
   Activity,
+  ActivityId,
   FormattedActivities,
   FormattedActivity
 } from '../types/activity';
 import type { DateId } from '../types/date';
 import { getDateId, timeOfDayToPercentage } from './date';
-import type { PatchActivityArgs, PostActivityArgs } from '../api/activity';
+import type {
+  PatchActivityPayload,
+  PostActivityPayload
+} from '../api/activity';
+import type { User } from '../types/user';
 
 /**
   based on the timezone of the browser, split the activity at each instance of midnight
@@ -85,7 +90,6 @@ export function formatActivities(dates: Date[], activities: Activity[] | null) {
     };
   }
 
-  // loop items
   for (const activity of activities ?? []) {
     const formattedActivity = formatActivity(activity);
 
@@ -101,13 +105,15 @@ export function formatActivities(dates: Date[], activities: Activity[] | null) {
 
 export class DerivedActivities {
   activities: FormattedActivities = {};
-  ids: Set<string> = new Set();
-  #idToDateId: Record<FormattedActivity['id'], DateId[]> = {};
-  constructor(dates: Date[], activities: Activity[] | undefined) {
-    this.createActivity = this.createActivity.bind(this);
+  #idToActivity: Record<ActivityId, Activity> = {};
+  #idToDateId: Record<ActivityId, DateId[]> = {};
+  #user: User;
+  #v: number = 1;
+  constructor(dates: Date[], activities: Activity[] | undefined, user: User) {
+    this.create = this.create.bind(this);
     this.replaceTempIdWithId = this.replaceTempIdWithId.bind(this);
-    this.deleteActivity = this.deleteActivity.bind(this);
-    this.updateActivity = this.updateActivity.bind(this);
+    this.delete = this.delete.bind(this);
+    this.update = this.update.bind(this);
 
     for (const date of dates) {
       this.activities[getDateId(date)] = {
@@ -117,14 +123,39 @@ export class DerivedActivities {
     }
 
     for (const activity of activities ?? []) {
-      this.ids.add(activity.id);
+      this.#v = Math.max(this.#v, activity.v);
+      this.#idToActivity[activity.id] = activity;
       this.#internal_create(activity);
     }
+
+    this.#user = user;
   }
 
-  createActivity(activity: PostActivityArgs, tempId?: string) {
-    if (!activity.id && tempId) activity.id = tempId;
-    this.#internal_create(activity as Activity, tempId);
+  create(tempId: string, activity: PostActivityPayload) {
+    const data: Activity = {
+      ...activity,
+      id: tempId,
+      createdAt: new Date().toISOString(),
+      user: this.#user.id,
+      v: this.#v
+    };
+
+    this.#internal_create(data, tempId);
+  }
+
+  update(id: ActivityId, activity: PatchActivityPayload) {
+    const target = this.#idToActivity[id];
+    const data: Activity = {
+      ...target,
+      ...activity
+    };
+
+    this.#internal_delete(id);
+    this.#internal_create(data);
+  }
+
+  delete(id: ActivityId) {
+    this.#internal_delete(id);
   }
 
   replaceTempIdWithId(id: string, tempId: string) {
@@ -134,17 +165,17 @@ export class DerivedActivities {
     for (const dateId of dateIds) {
       const hasTarget = this.activities[dateId].items[tempId] !== undefined;
       if (hasTarget) {
-        (this as any).activities[dateId].ids = (this as any).activities[
-          dateId
-        ].ids.filter((id_: string) => id_ !== tempId);
-        (this as any).activities[dateId].ids.push(id);
+        this.activities[dateId].ids = this.activities[dateId].ids.filter(
+          (id_: string) => id_ !== tempId
+        );
+        this.activities[dateId].ids.push(id);
 
         this.activities[dateId].items[id] =
           this.activities[dateId].items[tempId];
         delete this.activities[dateId].items[tempId];
         this.activities[dateId].items[id].id = id;
 
-        (this as any).activities[dateId].ids.sort((a: string, b: string) => {
+        this.activities[dateId].ids.sort((a: string, b: string) => {
           const itemA = this.activities[dateId].items[a];
           const itemB = this.activities[dateId].items[b];
 
@@ -155,15 +186,8 @@ export class DerivedActivities {
 
     this.#idToDateId[id] = this.#idToDateId[tempId];
     delete this.#idToDateId[tempId];
-  }
-
-  deleteActivity(id: FormattedActivity['id']) {
-    this.#internal_delete(id);
-  }
-
-  updateActivity(activity: PatchActivityArgs) {
-    this.#internal_delete(activity.id);
-    this.#internal_create(activity as Activity);
+    this.#idToActivity[id] = this.#idToActivity[tempId];
+    delete this.#idToActivity[tempId];
   }
 
   #internal_create(activity: Activity, tempId?: string) {
@@ -175,34 +199,37 @@ export class DerivedActivities {
       const newActivityIds = [...this.activities[part.dateId].ids];
       newActivityIds.push(activity.id);
 
-      (this as any).activities[part.dateId].ids = newActivityIds;
+      this.activities[part.dateId].ids = newActivityIds;
       this.activities[part.dateId].items[activity.id] = part;
       this.#idToDateId[activity.id] ??= [];
       this.#idToDateId[activity.id].push(part.dateId);
 
-      (this as any).activities[part.dateId].ids.sort((a: string, b: string) => {
+      this.activities[part.dateId].ids.sort((a: string, b: string) => {
         const itemA = this.activities[part.dateId].items[a];
         const itemB = this.activities[part.dateId].items[b];
 
         return itemA.startPercentage - itemB.startPercentage;
       });
     }
+
+    this.#idToActivity[activity.id] = activity;
   }
 
-  #internal_delete(id: FormattedActivity['id']) {
+  #internal_delete(id: ActivityId) {
     const dateIds = this.#idToDateId[id];
     if (!dateIds) return;
 
     for (const dateId of dateIds) {
       const hasTarget = this.activities[dateId].items[id] !== undefined;
       if (hasTarget) {
-        (this as any).activities[dateId].ids = (this as any).activities[
-          dateId
-        ].ids.filter((id_: string) => id_ !== id);
+        this.activities[dateId].ids = this.activities[dateId].ids.filter(
+          (id_: string) => id_ !== id
+        );
         delete this.activities[dateId].items[id];
       }
     }
 
     delete this.#idToDateId[id];
+    delete this.#idToActivity[id];
   }
 }
